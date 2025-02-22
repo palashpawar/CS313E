@@ -2,7 +2,7 @@
 Student information for this assignment:
 
 Replace <FULL NAME> with your name.
-On my honor Palash, this 
+On my honor Palash Pawar, this 
 programming assignment is my own work and I have not provided this code to 
 any other student.
 
@@ -134,14 +134,14 @@ def prepare_game():
         if arg.isdigit():
             random.seed(int(arg))
             secret_word = random.choice(secret_words)
-    
+   
         elif arg in valid_words and len(arg) == 5:
             secret_word = arg
         else: 
             raise ValueError(" Invalid argument. Must be a valid 5-letter word or an integer seed.")
 
     else:
-        raise ValueError("Too many arguments. Provide at most one argument (word or seed).") 
+        raise ValueError("Too many arguments. Provide at most one argument (word or seed).")
 
     # You do not have to change this return statement
     return secret_word, valid_words
