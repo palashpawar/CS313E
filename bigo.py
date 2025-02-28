@@ -1,7 +1,6 @@
 """
 Student information for this assignment:
 
-Replace <FULL NAME> with your name.
 On my honor, Palash Pawar, this 
 programming assignment is my own work and I have not provided this code to 
 any other student.
