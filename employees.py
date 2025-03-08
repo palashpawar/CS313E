@@ -29,75 +29,123 @@ PERCENTAGE_MAX = 100
 PERCENTAGE_MIN = 0
 SALARY_ERROR_MESSAGE = "Salary must be non-negative."
 
-class Employee:
-    def __init__(self, name, salary):
-        self.name = name
-        self.salary = max(0, salary)  
-        self.happiness = 50
-        self.performance = 75
-        self.savings = 1000
+from abc import ABC, abstractmethod
 
+class Employee(ABC):
+    def __init__(self, name, manager, salary, savings):
+        self.relationships = {}
+        self.savings = savings
+        self.is_employed = True
+        self.__name = name
+        self.__manager = manager
+        self.performance = INITIAL_PERFORMANCE
+        self.happiness = INITIAL_HAPPINESS
+        self.salary = salary
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def manager(self):
+        return self._manager
+
+    @property
+    def performance(self):
+        return self._performance
+
+    @performance.setter
+    def performance(self, value):
+        self._performance = max(PERCENTAGE_MIN, min(PERCENTAGE_MAX, value))
+
+    @property
+    def happiness(self):
+        return self._happiness
+
+    @happiness.setter
+    def happiness(self, value):
+        self._happiness = max(PERCENTAGE_MIN, min(PERCENTAGE_MAX, value))
+
+    @property
+    def salary(self):
+        return self._salary
+
+    @salary.setter
+    def salary(self, value):
+        if value < 0:
+            raise ValueError(SALARY_ERROR_MESSAGE)
+        self._salary = value
+
+    @abstractmethod
     def work(self):
-        self.performance += random.randint(-10, 10)
+        pass
 
     def interact(self, other):
-        if isinstance(other, Employee):
-            if self.happiness > 50 and other.happiness > 50:
-                self.happiness += 1
-            else:
-                self.happiness -= 1
+        if other.name not in self.relationships:
+            self.relationships[other.name] = 0
+
+        if self.relationships[other.name] > RELATIONSHIP_THRESHOLD:
+            self.happiness += 1
+        elif self.happiness >= HAPPINESS_THRESHOLD and other.happiness >= HAPPINESS_THRESHOLD:
+            self.relationships[other.name] += 1
+        else:
+            self.relationships[other.name] -= 1
+            self.happiness -= 1
+
+    def daily_expense(self):
+        self.happiness -= 1
+        self.savings -= DAILY_EXPENSE
 
     def __str__(self):
-        return f"{self.__class__.__name__}({self.name}, Salary: {self.salary}, Happiness: {self.happiness}, Performance: {self.performance})"
+        return f"{self.name}\nSalary: ${self.salary}\nSavings: ${self.savings}\nHappiness: {self.happiness}%\nPerformance: {self.performance}%"
 
 class Manager(Employee):
-    def __init__(self, name, salary):
-        super().__init__(name, salary)
-        self.employees = []
-
-    def add_employee(self, employee):
-        self.employees.append(employee)
-
     def work(self):
-        self.performance += random.randint(-5, 5)
-        self.happiness -= 1  
+        performance_change = random.randint(-5, 5)
+        self.performance += performance_change
 
-    def __str__(self):
-        return f"Manager({self.name}, Salary: {self.salary}, Happiness: {self.happiness}, Performance: {self.performance})"
+        if performance_change <= 0:
+            self.happiness -= 1
+            for employee in self.relationships:
+                self.relationships[employee] -= 1
+        else:
+            self.happiness += 1
 
 class TemporaryEmployee(Employee):
-    def __init__(self, name, salary, manager=None):
-        super().__init__(name, salary)
-        self.manager = manager
-
     def work(self):
-        self.performance += random.randint(-15, 15)
-        self.happiness -= 2 if self.performance < 50 else 1
+        performance_change = random.randint(-15, 15)
+        self.performance += performance_change
 
-    def interact(self, other):
-        if isinstance(other, Manager) and other != self.manager:
-            self.happiness -= 2  
+        if performance_change <= 0:
+            self.happiness -= 2
         else:
-            super().interact(other)
-
-    def __str__(self):
-        return f"TemporaryEmployee({self.name}, Salary: {self.salary}, Happiness: {self.happiness}, Performance: {self.performance})"
-
-class PermanentEmployee(Employee):
-    def __init__(self, name, salary, manager=None):
-        super().__init__(name, salary)
-        self.manager = manager
-
-    def work(self):
-        self.performance += random.randint(-10, 10)
-        if self.performance > 25:
             self.happiness += 1
 
     def interact(self, other):
-        if isinstance(other, Manager):
-            if other.happiness < 30:
-                self.happiness -= 3 
         super().interact(other)
 
-    def __str__(self):
-        return f"PermanentEmployee
+        if isinstance(self.manager, Manager) and other == self.manager:
+            if self.manager.happiness > HAPPINESS_THRESHOLD and self.performance >= TEMP_EMPLOYEE_PERFORMANCE_THRESHOLD:
+                self.savings += MANAGER_BONUS
+            elif self.manager.happiness <= HAPPINESS_THRESHOLD:
+                self.salary //= 2
+                self.happiness -= 5
+                if self.salary == 0:
+                    self.is_employed = False
+
+class PermanentEmployee(Employee):
+    def work(self):
+        performance_change = random.randint(-10, 10)
+        self.performance += performance_change
+
+        if performance_change >= 0:
+            self.happiness += 1
+
+    def interact(self, other):
+        super().interact(other)
+
+        if isinstance(self.manager, Manager) and other == self.manager:
+            if self.manager.happiness > HAPPINESS_THRESHOLD and self.performance > PERM_EMPLOYEE_PERFORMANCE_THRESHOLD:
+                self.savings += MANAGER_BONUS
+            elif self.manager.happiness <= HAPPINESS_THRESHOLD:
+                self.happiness -= 1
