@@ -111,9 +111,6 @@ class Manager(Employee):
         else:
             self.happiness += 1
 
-    def __str__(self):
-        return f"Manager {self.name}: Happiness={self.happiness}, Employees={len(self.employees)}"
-
 class TemporaryEmployee(Employee):
     def work(self):
         performance_change = random.randint(-15, 15)
@@ -135,9 +132,7 @@ class TemporaryEmployee(Employee):
                 self.happiness -= 5
                 if self.salary == 0:
                     self.is_employed = False
-    
-    def __str__(self):
-        return f"Temporary Employee {self.name}: Salary=${self.salary}, Performance={self.performance}, Employed={self.employed}"
+
 
 class PermanentEmployee(Employee):
     def work(self):
@@ -156,5 +151,3 @@ class PermanentEmployee(Employee):
             elif self.manager.happiness <= HAPPINESS_THRESHOLD:
                 self.happiness -= 1
 
-    def __str__(self):
-        return f"Permanent Employee {self.name}: Salary=${self.salary}, Performance={self.performance}"
