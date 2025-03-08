@@ -44,11 +44,11 @@ class Employee(ABC):
 
     @property
     def name(self):
-        return self._name
+        return self.__name
 
     @property
     def manager(self):
-        return self._manager
+        return self.__manager
 
     @property
     def performance(self):
