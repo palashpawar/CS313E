@@ -1,8 +1,7 @@
 """
 Student information for this assignment:
 
-Replace <FULL NAME> with your name.
-On my/our honor, Palash Pawar this
+On my/our honor,Palash Pawar, this
 programming assignment is my own work and I have not provided this code to
 any other student.
 
@@ -51,13 +50,10 @@ class Keyboard:
 
     def __str__(self):
         result = []
-        # First row: no leading spaces
         result.append(" ".join(color_word(self.colors[letter], letter) 
                               for letter in self.rows[0]))
-        # Second row: 1 leading space
         result.append(" " + " ".join(color_word(self.colors[letter], letter) 
                                     for letter in self.rows[1]))
-        # Third row: 3 leading spaces
         result.append("   " + " ".join(color_word(self.colors[letter], letter) 
                                       for letter in self.rows[2]))
         return "\n".join(result)
@@ -76,21 +72,21 @@ class WordFamily:
         if not isinstance(other, WordFamily):
             raise NotImplementedError("< operator only valid for WordFamily comparisons.")
         
-        # Compare by number of words (larger is "less")
+        # First tiebreaker: largest word family (opposite of normal sort)
         if len(self.words) != len(other.words):
             return len(self.words) > len(other.words)
         
-        # If equal length, compare by difficulty (higher is "less")
+        # Second tiebreaker: highest difficulty (opposite of normal sort)
         if self.difficulty != other.difficulty:
             return self.difficulty > other.difficulty
         
-        # If equal difficulty, compare lexicographically
+        # Third tiebreaker: lexicographical order (normal sort)
         return self.feedback_colors < other.feedback_colors
 
     def __str__(self):
         return (
             f"({len(self.words)}, {self.difficulty}, "
-            f"{color_word(self.feedback_colors, ['â'] * 5)})"
+            f"{color_word(self.feedback_colors, ['░'] * 5)})"
         )
 
     def __repr__(self):
@@ -98,7 +94,6 @@ class WordFamily:
 
 
 def print_explanation(attempts):
-    """Prints the 'how to play' instructions on the official website"""
     print("Welcome to Command Line Evil Wordle!")
     print()
     print("".join([BOLD_COLOR + letter + NO_COLOR for letter in "How To Play"]))
@@ -161,7 +156,6 @@ def prepare_game():
 
 
 def fast_sort(lst):
-    """Implementation of quicksort"""
     if len(lst) <= 1:
         return lst[:]
     
@@ -209,6 +203,8 @@ def get_feedback(remaining_secret_words, guessed_word):
                 for colors, words in feedback_groups.items()]
     
     # Sort to get hardest family (first element after sorting)
+    if not families:  # Handle empty case
+        return [NOT_IN_WORD_COLOR] * NUM_LETTERS, remaining_secret_words
     sorted_families = fast_sort(families)
     
     # Return feedback colors and words from hardest family
