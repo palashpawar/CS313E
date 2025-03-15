@@ -1,7 +1,7 @@
 """
 Student information for this assignment:
 
-On my/our honor,Palash Pawar, this
+On my/our honor, Palash Pawar, this
 programming assignment is my own work and I have not provided this code to
 any other student.
 
@@ -202,13 +202,16 @@ def get_feedback(remaining_secret_words, guessed_word):
     families = [WordFamily(colors, words) 
                 for colors, words in feedback_groups.items()]
     
-    # Sort to get hardest family (first element after sorting)
     if not families:  # Handle empty case
         return [NOT_IN_WORD_COLOR] * NUM_LETTERS, remaining_secret_words
-    sorted_families = fast_sort(families)
     
-    # Return feedback colors and words from hardest family
-    hardest_family = sorted_families[0]
+    # Find the "hardest" family using max with a custom key
+    hardest_family = max(families, key=lambda f: (
+        len(f.words),           # First: largest family size
+        f.difficulty,          # Second: highest difficulty
+        ''.join(f.feedback_colors)  # Third: lexicographical order
+    ))
+    
     return list(hardest_family.feedback_colors), hardest_family.words
 
 
