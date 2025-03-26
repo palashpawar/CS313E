@@ -34,7 +34,7 @@ class Node:
         """
         self.coeff = coeff
         self.exp = exp
-        self.next = link
+        self.next = None
 
     @property
     def coeff(self):
@@ -94,23 +94,13 @@ class Node:
         return f"({self.coeff}, {self.exp})"
 
 
+
 class LinkedList:
     def __init__(self):
-        # You are also welcome to use a sentinel/dummy node!
-        # It is definitely recommended, which will we learn more
-        # about in class on Monday 3/24. If you choose to use
-        # a dummy node, comment out the self.head = None
-        # and comment in the below line. We use None to make sure
-        # if there is an error where you accidentally include the
-        # dummy node in your calculation, it will throw an error.
-        # self.dummy = Node(None, None)
         self.head = None
 
-    # Insert the term with the coefficient coeff and exponent exp into the polynomial.
-    # If a term with that exponent already exists, add the coefficients together.
-    # You must keep the terms in descending order by exponent.
     def insert_term(self, coeff, exp):
-        if coeff == 0:  
+        if coeff == 0:
             return
             
         new_node = Node(coeff, exp)
@@ -119,30 +109,29 @@ class LinkedList:
             self.head = new_node
             return
             
-        if exp > self.head.exp:
-            new_node.next = self.head
-            self.head = new_node
+        if exp >= self.head.exp:
+            if exp == self.head.exp:
+                self.head.coeff += coeff
+                if self.head.coeff == 0:
+                    self.head = self.head.next
+            else:
+                new_node.next = self.head
+                self.head = new_node
             return
             
-        prev = None
-        curr = self.head
+        prev = self.head
+        curr = self.head.next
         while curr and curr.exp > exp:
             prev = curr
             curr = curr.next
             
         if curr and curr.exp == exp:
             curr.coeff += coeff
-            if curr.coeff == 0:  
-                if prev:
-                    prev.next = curr.next
-                else:
-                    self.head = curr.next
-        else:  
+            if curr.coeff == 0:
+                prev.next = curr.next
+        else:
             new_node.next = curr
-            if prev:
-                prev.next = new_node
-            else:
-                self.head = new_node
+            prev.next = new_node
 
     def add(self, p):
         result = LinkedList()
@@ -187,7 +176,9 @@ class LinkedList:
         while curr1:
             curr2 = p.head
             while curr2:
-                result.insert_term(curr1.coeff * curr2.coeff, curr1.exp + curr2.exp)
+                coeff_prod = curr1.coeff * curr2.coeff
+                exp_sum = curr1.exp + curr2.exp
+                result.insert_term(coeff_prod, exp_sum)
                 curr2 = curr2.next
             curr1 = curr1.next
         return result
@@ -202,25 +193,23 @@ class LinkedList:
             curr = curr.next
         return " + ".join(terms)
 
-
-    def main():
-        p = LinkedList()
-        n = int(input())
-        for _ in range(n):
-            coeff, exp = map(int, input().split())
-            p.insert_term(coeff, exp)
+def main():
+    p = LinkedList()
+    n = int(input())
+    for _ in range(n):
+        coeff, exp = map(int, input().split())
+        p.insert_term(coeff, exp)
     
-        input()  
+    input()  
     
-        q = LinkedList()
-        m = int(input())
-        for _ in range(m):
-            coeff, exp = map(int, input().split())
-            q.insert_term(coeff, exp)
+    q = LinkedList()
+    m = int(input())
+    for _ in range(m):
+        coeff, exp = map(int, input().split())
+        q.insert_term(coeff, exp)
     
-        print(p.add(q))
-        print(p.mult(q))
-
+    print(p.add(q))
+    print(p.mult(q))
 
 if __name__ == "__main__":
     main()
