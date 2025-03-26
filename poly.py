@@ -104,66 +104,121 @@ class LinkedList:
         # if there is an error where you accidentally include the
         # dummy node in your calculation, it will throw an error.
         # self.dummy = Node(None, None)
-        self.terms = {}
+        self.head = None
 
     # Insert the term with the coefficient coeff and exponent exp into the polynomial.
     # If a term with that exponent already exists, add the coefficients together.
     # You must keep the terms in descending order by exponent.
     def insert_term(self, coeff, exp):
-        if coeff == 0:
+        if coeff == 0:  
             return
-        # Add coefficient to existing term or create new one
-        new_coeff = self.terms.get(exp, 0) + coeff
-        if new_coeff == 0:
-            self.terms.pop(exp, None)  # Remove term if coefficient becomes 0
-        else:
-            self.terms[exp] = new_coeff
+            
+        new_node = Node(coeff, exp)
+        
+        if not self.head:
+            self.head = new_node
+            return
+            
+        if exp > self.head.exp:
+            new_node.next = self.head
+            self.head = new_node
+            return
+            
+        prev = None
+        curr = self.head
+        while curr and curr.exp > exp:
+            prev = curr
+            curr = curr.next
+            
+        if curr and curr.exp == exp:
+            curr.coeff += coeff
+            if curr.coeff == 0:  
+                if prev:
+                    prev.next = curr.next
+                else:
+                    self.head = curr.next
+        else:  
+            new_node.next = curr
+            if prev:
+                prev.next = new_node
+            else:
+                self.head = new_node
 
-    # Add a polynomial p to the polynomial and return the resulting polynomial as a new linked list.
     def add(self, p):
         result = LinkedList()
-        # Add all terms from self
-        for exp, coeff in self.terms.items():
-            result.insert_term(coeff, exp)
-        # Add all terms from p
-        for exp, coeff in p.terms.items():
-            result.insert_term(coeff, exp)
+        curr1 = self.head
+        curr2 = p.head
+        
+        if not curr1 and not curr2:
+            return result
+        if not curr1:
+            while curr2:
+                result.insert_term(curr2.coeff, curr2.exp)
+                curr2 = curr2.next
+            return result
+        if not curr2:
+            while curr1:
+                result.insert_term(curr1.coeff, curr1.exp)
+                curr1 = curr1.next
+            return result
+            
+        while curr1 or curr2:
+            if not curr2 or (curr1 and curr1.exp > curr2.exp):
+                result.insert_term(curr1.coeff, curr1.exp)
+                curr1 = curr1.next
+            elif not curr1 or (curr2 and curr2.exp > curr1.exp):
+                result.insert_term(curr2.coeff, curr2.exp)
+                curr2 = curr2.next
+            else:  
+                coeff_sum = curr1.coeff + curr2.coeff
+                if coeff_sum != 0:
+                    result.insert_term(coeff_sum, curr1.exp)
+                curr1 = curr1.next
+                curr2 = curr2.next
         return result
 
-    # Multiply a polynomial p with the polynomial and return the product as a new linked list.
     def mult(self, p):
         result = LinkedList()
-        # Multiply each term with each term
-        for exp1, coeff1 in self.terms.items():
-            for exp2, coeff2 in p.terms.items():
-                result.insert_term(coeff1 * coeff2, exp1 + exp2)
+        curr1 = self.head
+        
+        if not curr1 or not p.head:
+            return result
+            
+        while curr1:
+            curr2 = p.head
+            while curr2:
+                result.insert_term(curr1.coeff * curr2.coeff, curr1.exp + curr2.exp)
+                curr2 = curr2.next
+            curr1 = curr1.next
         return result
 
-    # Return a string representation of the polynomial.
     def __str__(self):
-        if not self.terms:
+        if not self.head:
             return ""
-        # Sort exponents in descending order and format terms
-        terms = [f"({coeff}, {exp})" for exp, coeff in sorted(self.terms.items(), reverse=True)]
+        terms = []
+        curr = self.head
+        while curr:
+            terms.append(f"({curr.coeff}, {curr.exp})")
+            curr = curr.next
         return " + ".join(terms)
 
 
     def main():
-    # Read first polynomial
         p = LinkedList()
-        for _ in range(int(input())):
+        n = int(input())
+        for _ in range(n):
             coeff, exp = map(int, input().split())
             p.insert_term(coeff, exp)
     
-        input()  # Skip blank line
+        input()  
     
-    # Read second polynomial
         q = LinkedList()
-        for _ in range(int(input())):
+        m = int(input())
+        for _ in range(m):
             coeff, exp = map(int, input().split())
             q.insert_term(coeff, exp)
     
-        print(p.add(q))    # Print sum
+        print(p.add(q))
         print(p.mult(q))
 
 
