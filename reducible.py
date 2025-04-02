@@ -57,15 +57,15 @@ def hash_word(s, size):
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
-def step_size(s, size):
+def step_size(s, prime=STEP_SIZE_CONSTANT):
     """
     Calculates step size for double hashing using STEP_SIZE_CONSTANT.
 
     pre: s is a lowercase string.
     post: Returns the calculated step size as an integer based on the provided string.
     """
-    prime = sympy.prevprime(size)  # Find the largest prime smaller than the table size
-    return prime - (hash_word(s, prime) % prime)  # Secondary hash function
+    return prime - (hash_word(s, prime) % prime)
+
 
 
 
@@ -79,15 +79,14 @@ def insert_word(s, hash_table):
     post: Inserts s into hash_table at the correct index; resolves any collisions
           by double hashing.
     """
-    table_size = len(hash_table)
-    index = hash_word(s, table_size)  # Primary hash function
-    step = step_size(s, table_size)
-
-    # Handle collisions using double hashing
-    while hash_table[index] != "" and hash_table[index] != s:
-        index = (index + step) % table_size  # Apply double hashing step
-
-    hash_table[index] = s  # Insert word
+    size = len(hash_table)
+    index = hash_word(s, size)
+    step = step_size(s)
+    
+    while hash_table[index] != "":  # Resolve collisions
+        index = (index + step) % size
+    
+    hash_table[index] = s
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -100,15 +99,15 @@ def find_word(s, hash_table):
     pre: s is a string, and hash_table is a list representing the hash table.
     post: Returns True if s is found in hash_table, otherwise returns False.
     """
-    table_size = len(hash_table)
-    index = hash_word(s, table_size)  # Primary hash function
-    step = step_size(s, table_size)
-
+    size = len(hash_table)
+    index = hash_word(s, size)
+    step = step_size(s)
+    
     while hash_table[index] != "":
         if hash_table[index] == s:
-            return True
-        index = (index + step) % table_size  # Apply double hashing step
-    
+            return True  # Found the word
+        index = (index + step) % size  # Check next location
+
     return False
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -122,18 +121,18 @@ def is_reducible(s, hash_table, hash_memo):
     post: Returns True if s is reducible (also updates hash_memo by
           inserting s if reducible), otherwise returns False.
     """
-    if s in {"a", "i", "o"}:
+    if s in ("a", "i", "o"):  
+        return True
+    
+    if find_word(s, hash_memo):  
         return True
 
-    if find_word(s, hash_memo):
-        return True
-
-    for i in range(len(s)):
+    for i in range(len(s)):  
         sub_word = s[:i] + s[i+1:]
         if find_word(sub_word, hash_table) and is_reducible(sub_word, hash_table, hash_memo):
-            insert_word(s, hash_memo)  # Cache result
+            insert_word(s, hash_memo) 
             return True
-
+    
     return False
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -144,10 +143,8 @@ def get_longest_words(string_list):
     pre: string_list is a list of lowercase strings.
     post: Returns a list of words in string_list that have the maximum length.
     """
-    if not string_list:
-        return []
-    max_length = max(len(word) for word in string_list)
-    return [word for word in string_list if len(word) == max_length]
+    max_len = max(len(word) for word in string_list) if string_list else 0
+    return sorted([word for word in string_list if len(word) == max_len])
 
 
 
