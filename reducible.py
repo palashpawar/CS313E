@@ -64,11 +64,8 @@ def step_size(s):
     pre: s is a lowercase string.
     post: Returns the calculated step size as an integer based on the provided string.
     """
-    hash_val = 0
-    for char in s:
-        hash_val += ord(char)
-    
-    return hash_val % STEP_SIZE_CONSTANT + 1
+    h = sum(ord(c) for c in s)
+    return (h % 7) or 1
 
 
 
@@ -83,24 +80,21 @@ def insert_word(s, hash_table):
     post: Inserts s into hash_table at the correct index; resolves any collisions
           by double hashing.
     """
-    size = len(hash_table)
-    index = hash_word(s, size)
-    
-    if hash_table[index] == "" or hash_table[index] == s:
-        hash_table[index] = s
-        return
-    
+    pos = hash(s) % len(hash_table)
     step = step_size(s)
-    i = 1
-    while True:
-        new_index = (index + i * step) % size
-        if hash_table[new_index] == "" or hash_table[new_index] == s:
-            hash_table[new_index] = s
-            return
-        i += 1
-        if i >= size:
-            return
+    original_pos = pos
 
+    if not any(hash_table):
+        hash_table[pos] = s
+        return
+
+    while hash_table[pos] != "":
+        if hash_table[pos] == s:
+            return
+        pos = (pos + step) % len(hash_table)
+        if pos == original_pos:
+            return
+    hash_table[pos] = s
 
 # TODO: Modify this function. You may delete this comment when you are done.
 def find_word(s, hash_table):
@@ -112,27 +106,18 @@ def find_word(s, hash_table):
     pre: s is a string, and hash_table is a list representing the hash table.
     post: Returns True if s is found in hash_table, otherwise returns False.
     """
-    size = len(hash_table)
-    index = hash_word(s, size)
-    
-    if hash_table[index] == s:
-        return True
-    
-    if hash_table[index] != "":  
-        step = step_size(s)
-        i = 1
-        count = 0
-        
-        while count < size:
-            new_index = (index + i * step) % size
-            if hash_table[new_index] == "":
-                return False
-            if hash_table[new_index] == s:
-                return True
-            i += 1
-            count += 1
-    
+    pos = hash(s) % len(hash_table)
+    step = step_size(s)
+    original_pos = pos
+
+    while hash_table[pos] != "":
+        if hash_table[pos] == s:
+            return True
+        pos = (pos + step) % len(hash_table)
+        if pos == original_pos:
+            return False
     return False
+
 
 # TODO: Modify this function. You may delete this comment when you are done.
 def is_reducible(s, hash_table, hash_memo):
@@ -145,22 +130,22 @@ def is_reducible(s, hash_table, hash_memo):
     post: Returns True if s is reducible (also updates hash_memo by
           inserting s if reducible), otherwise returns False.
     """
-    if find_word(s, hash_memo):
+    if s in ["a", "i", "o"]:
         return True
-    
-    if s in ['a', 'i', 'o']:
-        return True
-    
-    if not find_word(s, hash_table):
+
+    if len(s) == 1:
         return False
-    
+
+    if s in hash_memo:
+        return True
+
     for i in range(len(s)):
-        reduced_word = s[:i] + s[i+1:]
-        if is_reducible(reduced_word, hash_table, hash_memo):
-            if s not in ['a', 'i', 'o']:
-                insert_word(s, hash_memo)
-            return True
-    
+        sub_word = s[:i] + s[i + 1:]
+        if find_word(sub_word, hash_table):
+            if is_reducible(sub_word, hash_table, hash_memo):
+                if s not in ["a", "i", "o"]:
+                    hash_memo.append(s)
+                return True
     return False
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -173,19 +158,10 @@ def get_longest_words(string_list):
     """
     if not string_list:
         return []
-    
-    max_length = 0
-    longest_words = []
-    
-    for word in string_list:
-        if len(word) > max_length:
-            max_length = len(word)
-    
-    for word in string_list:
-        if len(word) == max_length:
-            longest_words.append(word)
-    
-    return longest_words
+    max_len = max(len(s) for s in string_list)
+    return [s for s in string_list if len(s) == max_len]
+
+
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -231,44 +207,35 @@ def main():
 
     word_list = []
 
-    for line in sys.stdin:
-        word = line.strip().lower()
-        word_list.append(word)
+    try:
+        while True:
+            word = input().strip()
+            word_list.append(word)
+    except EOFError:
+        pass
 
-    word_list_len = len(word_list)
+    N = 2 * len(word_list)
+    while True:
+        if is_prime(N):
+            break
+        N += 1
 
-    n = 2 * word_list_len
-    while not is_prime(n):
-        n += 1
-
-    hash_list = []
-
-    for i in range(n):
-        hash_list.append("")
-
+    hash_table = [""] * N
     for word in word_list:
-        insert_word(word, hash_list)
+        insert_word(word, hash_table)
 
-   
-    m = int(0.2 * word_list_len)
-    while not is_prime(m):
-        m += 1
-    
     hash_memo = []
-    for i in range(m):
-        hash_memo.append("")
 
     reducible_words = []
 
- 
     for word in word_list:
-        if is_reducible(word, hash_list, hash_memo):
+        if is_reducible(word, hash_table, hash_memo):
             reducible_words.append(word)
 
     longest_words = get_longest_words(reducible_words)
-
-    for word in sorted(longest_words):
+    for word in sorted(reducible_words):
         print(word)
+
 
 if __name__ == "__main__":
     main()
