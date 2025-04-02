@@ -64,10 +64,11 @@ def step_size(s):
     pre: s is a lowercase string.
     post: Returns the calculated step size as an integer based on the provided string.
     """
-    step = STEP_SIZE_CONSTANT
-    for i in range(len(s)):
-        step += ord(s[i])
-    return step
+    hash_val = 0
+    for char in s:
+        hash_val += ord(char)
+    
+    return hash_val % STEP_SIZE_CONSTANT + 1
 
 
 
@@ -85,7 +86,6 @@ def insert_word(s, hash_table):
     size = len(hash_table)
     index = hash_word(s, size)
     
-    # If the slot is empty or matches the word, insert/update
     if hash_table[index] == "" or hash_table[index] == s:
         hash_table[index] = s
         return
@@ -98,6 +98,8 @@ def insert_word(s, hash_table):
             hash_table[new_index] = s
             return
         i += 1
+        if i >= size:
+            return
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -119,17 +121,16 @@ def find_word(s, hash_table):
     if hash_table[index] != "":  
         step = step_size(s)
         i = 1
-        original_index = index
+        count = 0
         
-        while True:
+        while count < size:
             new_index = (index + i * step) % size
             if hash_table[new_index] == "":
                 return False
             if hash_table[new_index] == s:
                 return True
             i += 1
-            if (index + i * step) % size == original_index:
-                return False
+            count += 1
     
     return False
 
@@ -173,9 +174,18 @@ def get_longest_words(string_list):
     if not string_list:
         return []
     
-    max_length = max(len(word) for word in string_list)
-    return [word for word in string_list if len(word) == max_length]
-
+    max_length = 0
+    longest_words = []
+    
+    for word in string_list:
+        if len(word) > max_length:
+            max_length = len(word)
+    
+    for word in string_list:
+        if len(word) == max_length:
+            longest_words.append(word)
+    
+    return longest_words
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -221,7 +231,6 @@ def main():
 
     word_list = []
 
-    
     for line in sys.stdin:
         word = line.strip().lower()
         word_list.append(word)
@@ -240,6 +249,7 @@ def main():
     for word in word_list:
         insert_word(word, hash_list)
 
+   
     m = int(0.2 * word_list_len)
     while not is_prime(m):
         m += 1
@@ -250,6 +260,7 @@ def main():
 
     reducible_words = []
 
+ 
     for word in word_list:
         if is_reducible(word, hash_list, hash_memo):
             reducible_words.append(word)
