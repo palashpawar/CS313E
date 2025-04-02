@@ -57,14 +57,17 @@ def hash_word(s, size):
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
-def step_size(s, prime=STEP_SIZE_CONSTANT):
+def step_size(s):
     """
     Calculates step size for double hashing using STEP_SIZE_CONSTANT.
 
     pre: s is a lowercase string.
     post: Returns the calculated step size as an integer based on the provided string.
     """
-    return prime - (hash_word(s, prime) % prime)
+    step = STEP_SIZE_CONSTANT
+    for i in range(len(s)):
+        step += ord(s[i])
+    return step
 
 
 
@@ -81,12 +84,20 @@ def insert_word(s, hash_table):
     """
     size = len(hash_table)
     index = hash_word(s, size)
+    
+    # If the slot is empty or matches the word, insert/update
+    if hash_table[index] == "" or hash_table[index] == s:
+        hash_table[index] = s
+        return
+    
     step = step_size(s)
-    
-    while hash_table[index] != "":  # Resolve collisions
-        index = (index + step) % size
-    
-    hash_table[index] = s
+    i = 1
+    while True:
+        new_index = (index + i * step) % size
+        if hash_table[new_index] == "" or hash_table[new_index] == s:
+            hash_table[new_index] = s
+            return
+        i += 1
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -101,13 +112,25 @@ def find_word(s, hash_table):
     """
     size = len(hash_table)
     index = hash_word(s, size)
-    step = step_size(s)
     
-    while hash_table[index] != "":
-        if hash_table[index] == s:
-            return True  # Found the word
-        index = (index + step) % size  # Check next location
-
+    if hash_table[index] == s:
+        return True
+    
+    if hash_table[index] != "":  
+        step = step_size(s)
+        i = 1
+        original_index = index
+        
+        while True:
+            new_index = (index + i * step) % size
+            if hash_table[new_index] == "":
+                return False
+            if hash_table[new_index] == s:
+                return True
+            i += 1
+            if (index + i * step) % size == original_index:
+                return False
+    
     return False
 
 # TODO: Modify this function. You may delete this comment when you are done.
@@ -121,16 +144,20 @@ def is_reducible(s, hash_table, hash_memo):
     post: Returns True if s is reducible (also updates hash_memo by
           inserting s if reducible), otherwise returns False.
     """
-    if s in ("a", "i", "o"):  
+    if find_word(s, hash_memo):
         return True
     
-    if find_word(s, hash_memo):  
+    if s in ['a', 'i', 'o']:
         return True
-
-    for i in range(len(s)):  
-        sub_word = s[:i] + s[i+1:]
-        if find_word(sub_word, hash_table) and is_reducible(sub_word, hash_table, hash_memo):
-            insert_word(s, hash_memo) 
+    
+    if not find_word(s, hash_table):
+        return False
+    
+    for i in range(len(s)):
+        reduced_word = s[:i] + s[i+1:]
+        if is_reducible(reduced_word, hash_table, hash_memo):
+            if s not in ['a', 'i', 'o']:
+                insert_word(s, hash_memo)
             return True
     
     return False
@@ -143,8 +170,11 @@ def get_longest_words(string_list):
     pre: string_list is a list of lowercase strings.
     post: Returns a list of words in string_list that have the maximum length.
     """
-    max_len = max(len(word) for word in string_list) if string_list else 0
-    return sorted([word for word in string_list if len(word) == max_len])
+    if not string_list:
+        return []
+    
+    max_length = max(len(word) for word in string_list)
+    return [word for word in string_list if len(word) == max_length]
 
 
 
@@ -189,35 +219,44 @@ def main():
 
     # find the largest reducible words in reducible_words
 
-    # print the reducible words in alphabetical order
-    # one word per line
     word_list = []
 
+    
     for line in sys.stdin:
-        word_list.append(line.strip())  
+        word = line.strip().lower()
+        word_list.append(word)
 
-    word_list_size = len(word_list)
+    word_list_len = len(word_list)
 
-    N = sympy.nextprime(2 * word_list_size)
+    n = 2 * word_list_len
+    while not is_prime(n):
+        n += 1
 
-    hash_table = [""] * N
+    hash_list = []
+
+    for i in range(n):
+        hash_list.append("")
 
     for word in word_list:
-        insert_word(word, hash_table)
+        insert_word(word, hash_list)
 
-    M = sympy.nextprime(int(0.2 * word_list_size))
-
-    hash_memo = [""] * M
+    m = int(0.2 * word_list_len)
+    while not is_prime(m):
+        m += 1
+    
+    hash_memo = []
+    for i in range(m):
+        hash_memo.append("")
 
     reducible_words = []
 
     for word in word_list:
-        if is_reducible(word, hash_table, hash_memo):
+        if is_reducible(word, hash_list, hash_memo):
             reducible_words.append(word)
 
-    longest_reducible_words = get_longest_words(reducible_words)
+    longest_words = get_longest_words(reducible_words)
 
-    for word in sorted(longest_reducible_words):
+    for word in sorted(longest_words):
         print(word)
 
 if __name__ == "__main__":
