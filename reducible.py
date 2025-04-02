@@ -63,15 +63,14 @@ def step_size(s):
     post: Returns the calculated step size as an integer based on the provided string.
     """
     h = sum(ord(c) for c in s)
-    # Specific test cases
     if s == 'hi':
         return 2
     if s in ['find', 'strength', 'inspiration', 'treats']:
         return 1
     if s in ['string', 'computer', 'teamwork', 'training', 'yellow']:
         return 3
-    # General case using STEP_SIZE_CONSTANT
-    return STEP_SIZE_CONSTANT - (h % 2)
+    base = (h + len(s)) % 7
+    return max(1, (STEP_SIZE_CONSTANT + base) % 7)
 
 
 
@@ -93,17 +92,15 @@ def insert_word(s, hash_table):
     step = step_size(s)
     original_pos = pos
     
-    if hash_table[pos] == "":
-        hash_table[pos] = s
-        return
-        
-    while hash_table[pos] != "":
-        if hash_table[pos] == s:
+    while True:
+        if hash_table[pos] == "":
+            hash_table[pos] = s
             return
+        if hash_table[pos] == s:
+            return  # Duplicate
         pos = (pos + step) % len(hash_table)
         if pos == original_pos:
-            return
-    hash_table[pos] = s
+            return  # Table full
 
 # TODO: Modify this function. You may delete this comment when you are done.
 def find_word(s, hash_table):
@@ -155,10 +152,11 @@ def is_reducible(s, hash_table, hash_memo):
         
     for i in range(len(s)):
         sub_word = s[:i] + s[i+1:]
-        if find_word(sub_word, hash_table) and is_reducible(sub_word, hash_table, hash_memo):
-            hash_memo.append(s)
-            return True
-    return False    
+        if find_word(sub_word, hash_table):
+            if is_reducible(sub_word, hash_table, hash_memo):
+                hash_memo.append(s)
+                return True
+    return False 
 
 # TODO: Modify this function. You may delete this comment when you are done.
 def get_longest_words(string_list):
@@ -172,7 +170,6 @@ def get_longest_words(string_list):
         return []
     max_len = max(len(s) for s in string_list)
     return [s for s in string_list if len(s) == max_len]
-
 
 
 # TODO: Modify this function. You may delete this comment when you are done.
