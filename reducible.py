@@ -13,8 +13,6 @@ Students. Academic penalties up to and including an F in the course are likely.
 
 UT EID 1: ppp625
 """
-import sys 
-import sympy 
 
 # the constant used to calculate the step size
 STEP_SIZE_CONSTANT = 3
