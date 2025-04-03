@@ -1,7 +1,7 @@
 """
 Student information for this assignment:
 
-On my honor, Palash Pawar, this
+On my/our honor, Palash, this
 programming assignment is my own work and I have not provided this code to
 any other student.
 
@@ -14,7 +14,6 @@ Students. Academic penalties up to and including an F in the course are likely.
 UT EID 1: ppp625
 """
 
-# the constant used to calculate the step size
 STEP_SIZE_CONSTANT = 3
 
 
@@ -54,7 +53,6 @@ def hash_word(s, size):
     return hash_idx
 
 
-# TODO: Modify this function. You may delete this comment when you are done.
 def step_size(s):
     """
     Calculates step size for double hashing using STEP_SIZE_CONSTANT.
@@ -62,20 +60,9 @@ def step_size(s):
     pre: s is a lowercase string.
     post: Returns the calculated step size as an integer based on the provided string.
     """
-    h = sum(ord(c) for c in s)
-    if s == 'hi':
-        return 2
-    if s in ['find', 'strength', 'inspiration', 'treats']:
-        return 1
-    if s in ['string', 'computer', 'teamwork', 'training', 'yellow']:
-        return 3
-    base = (h + len(s)) % 7
-    return max(1, (STEP_SIZE_CONSTANT + base) % 7)
+    return STEP_SIZE_CONSTANT - hash_word(s, STEP_SIZE_CONSTANT)
 
 
-
-
-# TODO: Modify this function. You may delete this comment when you are done.
 def insert_word(s, hash_table):
     """
     Inserts a string into the hash table using double hashing for collision resolution.
@@ -85,24 +72,16 @@ def insert_word(s, hash_table):
     post: Inserts s into hash_table at the correct index; resolves any collisions
           by double hashing.
     """
-    if not s or not hash_table:
-        return
-    
-    pos = hash_word(s, len(hash_table))
+    table_size = len(hash_table)
+    index = hash_word(s, table_size)
     step = step_size(s)
-    original_pos = pos
-    
-    while True:
-        if hash_table[pos] == "":
-            hash_table[pos] = s
-            return
-        if hash_table[pos] == s:
-            return  # Duplicate
-        pos = (pos + step) % len(hash_table)
-        if pos == original_pos:
-            return  # Table full
+    while hash_table[index] != "":
+        if hash_table[index] == s:
+            return  
+        index = (index + step) % table_size
+    hash_table[index] = s
 
-# TODO: Modify this function. You may delete this comment when you are done.
+
 def find_word(s, hash_table):
     """
     Searches for a string in the hash table.
@@ -112,23 +91,19 @@ def find_word(s, hash_table):
     pre: s is a string, and hash_table is a list representing the hash table.
     post: Returns True if s is found in hash_table, otherwise returns False.
     """
-    if not s or not hash_table:
-        return False
-        
-    pos = hash_word(s, len(hash_table))
+    table_size = len(hash_table)
+    index = hash_word(s, table_size)
     step = step_size(s)
-    original_pos = pos
-    
-    while hash_table[pos] != "":
-        if hash_table[pos] == s:
+    start_index = index
+    while hash_table[index] != "":
+        if hash_table[index] == s:
             return True
-        pos = (pos + step) % len(hash_table)
-        if pos == original_pos:
-            return False
+        index = (index + step) % table_size
+        if index == start_index:
+            break
     return False
 
 
-# TODO: Modify this function. You may delete this comment when you are done.
 def is_reducible(s, hash_table, hash_memo):
     """
     Determines if a string is reducible using a recursive check.
@@ -139,26 +114,24 @@ def is_reducible(s, hash_table, hash_memo):
     post: Returns True if s is reducible (also updates hash_memo by
           inserting s if reducible), otherwise returns False.
     """
-    if not s or not hash_table:
-        return False
-        
-    if s in ["a", "i", "o"]:
+    if s == "":
         return True
-    if len(s) == 1:
-        return False
-        
-    if s in hash_memo:
-        return True
-        
-    for i in range(len(s)):
-        sub_word = s[:i] + s[i+1:]
-        if find_word(sub_word, hash_table):
-            if is_reducible(sub_word, hash_table, hash_memo):
-                hash_memo.append(s)
-                return True
-    return False 
 
-# TODO: Modify this function. You may delete this comment when you are done.
+    if find_word(s, hash_memo):
+        return True
+
+    if not find_word(s, hash_table):
+        return False
+
+    for i in range(len(s)):
+        subword = s[:i] + s[i+1:]
+        if is_reducible(subword, hash_table, hash_memo):
+            insert_word(s, hash_memo)
+            return True
+
+    return False
+
+
 def get_longest_words(string_list):
     """
     Finds longest words from a list.
@@ -168,82 +141,55 @@ def get_longest_words(string_list):
     """
     if not string_list:
         return []
-    max_len = max(len(s) for s in string_list)
-    return [s for s in string_list if len(s) == max_len]
+    max_length = max(len(word) for word in string_list)
+    longest_words = [word for word in string_list if len(word) == max_length]
+    return longest_words
 
 
-# TODO: Modify this function. You may delete this comment when you are done.
 def main():
     """The main function that calculates the longest reducible words"""
-    # create an empty word_list
+    import sys
 
-    # read words using input redirection
-    # where each line read from input()
-    # should be a single word. Append to word_list
-    # ensure each word has no trailing white space.
-
-    # find length of word_list
-
-    # determine prime number N that is greater than twice
-    # the length of the word_list
-
-    # create an empty hash_list
-
-    # populate the hash_list with N blank strings
-
-    # hash each word in word_list into hash_list
-    # for collisions use double hashing
-
-    # create an empty hash_memo of size M
-    # we do not know a priori how many words will be reducible
-    # let us assume it is 10 percent (fairly safe) of the words
-    # then M is a prime number that is slightly greater than
-    # 0.2 * size of word_list
-
-    # populate the hash_memo with M blank strings
-
-    # create an empty list reducible_words
-
-    # for each word in the word_list recursively determine
-    # if it is reducible, if it is, add it to reducible_words
-    # as you recursively remove one letter at a time check
-    # first if the sub-word exists in the hash_memo. if it does
-    # then the word is reducible and you do not have to test
-    # any further. add the word to the hash_memo.
-
-    # find the largest reducible words in reducible_words
-
+    # Read the words from input (each word on its own line)
     word_list = []
-    
-    try:
-        while True:
-            word = input().strip().lower()
-            if word:
-                word_list.append(word)
-    except EOFError:
-        pass
-    
-    if not word_list:
-        return
-        
-    N = 2 * len(word_list)
+    for line in sys.stdin:
+        word = line.strip()
+        if word:  # Ensure word is not empty
+            word_list.append(word)
+
+    # Determine prime number N that is greater than twice the length of word_list.
+    N = 2 * len(word_list) + 1
     while not is_prime(N):
         N += 1
-    
-    hash_table = [""] * N
+
+    # Create an empty hash_table (dictionary) of size N, filled with blank strings.
+    hash_table = ["" for _ in range(N)]
+    # Insert each word from word_list into the hash_table using double hashing.
     for word in word_list:
         insert_word(word, hash_table)
-    
-    hash_memo = []
+
+    # Determine size M for the memoization hash table.
+    # Let M be a prime number slightly greater than 0.2 * len(word_list).
+    M_candidate = int(0.2 * len(word_list)) + 1
+    while not is_prime(M_candidate):
+        M_candidate += 1
+    M = M_candidate
+
+    # Create an empty hash_memo for memoizing reducible words.
+    hash_memo = ["" for _ in range(M)]
+
+    # Create a list to store reducible words.
     reducible_words = []
-    
     for word in word_list:
         if is_reducible(word, hash_table, hash_memo):
             reducible_words.append(word)
-    
-    if reducible_words:
-        for word in sorted(reducible_words):
-            print(word)
+
+    # Get the longest reducible words.
+    longest_words = get_longest_words(reducible_words)
+    # Print the longest reducible words in alphabetical order, one per line.
+    for word in sorted(longest_words):
+        print(word)
+
 
 if __name__ == "__main__":
     main()
