@@ -55,10 +55,10 @@ def rail_fence_decode(string, key):
             direction *= -1
     counts = [pattern.count(i) for i in range(key)]
     rails = []
-    index = 0
+    idx = 0
     for count in counts:
-        rails.append(list(string[index:index+count]))
-        index += count
+        rails.append(list(string[idx:idx+count]))
+        idx += count
     result = []
     rail = 0
     direction = 1
@@ -123,6 +123,8 @@ def vigenere_encode(string, phrase):
         if c.isalpha():
             result += encode_character(phrase[i % len(phrase)], c)
             i += 1
+        else:
+            result += c
     return result
 
 
@@ -141,6 +143,8 @@ def vigenere_decode(string, phrase):
         if c.isalpha():
             result += decode_character(phrase[i % len(phrase)], c)
             i += 1
+        else:
+            result += c
     return result
 
 
@@ -170,7 +174,9 @@ def main():
     # read the pass phrase from stdin (terminal/input)
 
     # decrypt and print the plain text using Vigenere cipher
-    print("Rail Fence Cipher\n")
+    print("Rail Fence Cipher")
+    print()
+
     plain_text = input("Plain Text: ")
     key = int(input("Key: "))
     encoded = rail_fence_encode(plain_text, key)
@@ -183,7 +189,9 @@ def main():
     print("Decoded Text:", decoded)
     print()
 
-    print("Vigenere Cipher\n")
+    print("Vigenere Cipher")
+    print()
+
     plain_text = input("Plain Text: ")
     passphrase = input("Pass Phrase: ")
     encoded = vigenere_encode(plain_text, passphrase)
@@ -194,6 +202,7 @@ def main():
     passphrase2 = input("Pass Phrase: ")
     decoded = vigenere_decode(encoded_text, passphrase2)
     print("Decoded Text:", decoded)
+
 
 
 # Do NOT modify the following code.
