@@ -123,21 +123,21 @@ def vigenere_encode(string, phrase):
     post: function returns a single string that is encoded with
         Vigenere algorithm
     """
+    filtered_string = filter_string(string)
+    if not filtered_string:
+        return ""
+        
     result = []
     phrase = filter_string(phrase)
     if not phrase:
-        return string
+        return filtered_string
         
     phrase_index = 0
-    filtered_string = filter_string(string)
     
-    for char in string:
-        if char.isalpha():
-            p = phrase[phrase_index % len(phrase)]
-            result.append(encode_character(p, char))
-            phrase_index += 1
-        else:
-            result.append(char)
+    for char in filtered_string:
+        p = phrase[phrase_index % len(phrase)]
+        result.append(encode_character(p, char))
+        phrase_index += 1
             
     return ''.join(result)
 
@@ -147,10 +147,14 @@ def vigenere_decode(string, phrase):
     post: function returns a single string that is decoded with
         Vigenere algorithm
     """
+    filtered_string = filter_string(string)
+    if not filtered_string:
+        return ""
+        
     result = []
     phrase = filter_string(phrase)
     if not phrase:
-        return string
+        return filtered_string
         
     phrase_index = 0
     
@@ -159,8 +163,6 @@ def vigenere_decode(string, phrase):
             p = phrase[phrase_index % len(phrase)]
             result.append(decode_character(p, char))
             phrase_index += 1
-        else:
-            result.append(char)
             
     return ''.join(result)
 
