@@ -15,179 +15,147 @@ UT EID 1: ppp625
 """
 
 
+#!/usr/bin/env python3
+
 def rail_fence_encode(string, key):
     """
-    pre: string is a string of characters and key is a positive
-        integer 2 or greater and strictly less than the length
-        of string
-    post: returns a single string that is encoded with
-        rail fence algorithm
+    pre: string is a string of characters and key is an integer 2 <= key
+         and key <= len(string)
+    post: returns a single string encoded with the rail-fence algorithm
     """
-    if not string or key <= 1:
-        return string
+    # create rows
+    rails = [''] * key
+    row = 0
+    direction = 1  # 1 = down, -1 = up
 
-    rail = [''] * key
-    row, step = 0, 1
-    
-    for char in string:
-        rail[row] += char
-        row += step
-        if row == key - 1 or row == 0:
-            step = -step
-            
-    return ''.join(rail)
+    for ch in string:
+        rails[row] += ch
+        # if we hit top or bottom, flip direction
+        if row + direction == key or row + direction < 0:
+            direction *= -1
+        row += direction
+
+    return ''.join(rails)
+
 
 def rail_fence_decode(string, key):
     """
-    pre: string is a string of characters and key is a positive
-        integer 2 or greater and strictly less than the length
-        of string
-    post: function returns a single string that is decoded with
-        rail fence algorithm
+    pre: string is a string of characters and key is an integer 2 <= key
+         and key <= len(string)
+    post: returns the decoded plain text
     """
-    if not string or key <= 1:
-        return string
+    n = len(string)
+    # empty grid
+    grid = [[''] * n for _ in range(key)]
 
-    # Create the zigzag pattern
-    pattern = []
-    row, step = 0, 1
-    for _ in range(len(string)):
-        pattern.append(row)
-        row += step
-        if row == key - 1 or row == 0:
-            step = -step
-    
-    # Calculate rail lengths
-    rail_lengths = [0] * key
-    for r in pattern:
-        rail_lengths[r] += 1
-    
-    # Distribute characters to rails
-    rails = []
-    pos = 0
-    for length in rail_lengths:
-        rails.append(list(string[pos:pos+length]))
-        pos += length
-    
-    # Reconstruct string
-    result = [''] * len(string)
-    for i, r in enumerate(pattern):
-        result[i] = rails[r].pop(0)
-        
+    # mark the zig-zag path
+    row = 0
+    direction = 1
+    for col in range(n):
+        grid[row][col] = '*'
+        if row + direction == key or row + direction < 0:
+            direction *= -1
+        row += direction
+
+    # fill in letters row by row
+    idx = 0
+    for r in range(key):
+        for c in range(n):
+            if grid[r][c] == '*' and idx < n:
+                grid[r][c] = string[idx]
+                idx += 1
+
+    # read off in zig-zag order
+    result = []
+    row = 0
+    direction = 1
+    for col in range(n):
+        result.append(grid[row][col])
+        if row + direction == key or row + direction < 0:
+            direction *= -1
+        row += direction
+
     return ''.join(result)
+
 
 def filter_string(string):
     """
-    pre: string is a string of characters
-    post: function converts all characters to lower case and then
-        removes all digits, punctuation marks, and spaces. It
-        returns a single string with only lower case characters
+    pre:  string is a string of characters
+    post: returns lowercase-only string with no digits, punctuation, or spaces
     """
-    return ''.join(char.lower() for char in string if char.isalpha())
+    s = string.lower()
+    return ''.join(ch for ch in s if 'a' <= ch <= 'z')
+
 
 def encode_character(p, s):
     """
-    pre: p is a character in the pass phrase and s is a character
-        in the plain text
-    post: function returns a single character encoded using the
-        Vigenere algorithm. You may not use a 2-D list
+    pre:  p is a lowercase letter, s is a lowercase letter
+    post: returns the Vigenere-encoded character
     """
-    if not s.isalpha():
-        return s
-    p = p.lower()
-    s = s.lower()
-    p_val = ord(p) - ord('a')
-    s_val = ord(s) - ord('a')
-    encoded_val = (s_val + p_val) % 26
-    return chr(encoded_val + ord('a'))
+    shift = (ord(s) - 97 + (ord(p) - 97)) % 26
+    return chr(shift + 97)
+
 
 def decode_character(p, s):
     """
-    pre: p is a character in the pass phrase and s is a character
-        in the encrypted text
-    post: function returns a single character decoded using the
-        Vigenere algorithm. You may not use a 2-D list
+    pre:  p is a lowercase letter, s is a lowercase letter
+    post: returns the Vigenere-decoded character
     """
-    if not s.isalpha():
-        return s
-    p = p.lower()
-    s = s.lower()
-    p_val = ord(p) - ord('a')
-    s_val = ord(s) - ord('a')
-    decoded_val = (s_val - p_val) % 26
-    return chr(decoded_val + ord('a'))
+    shift = (ord(s) - 97 - (ord(p) - 97) + 26) % 26
+    return chr(shift + 97)
+
 
 def vigenere_encode(string, phrase):
     """
-    pre: string is a string of characters and phrase is a pass phrase
-    post: function returns a single string that is encoded with
-        Vigenere algorithm
+    pre:  string is raw text, phrase is passphrase
+    post: returns the Vigenere-encoded lowercase string
     """
+    plain = filter_string(string)
+    key = filter_string(phrase)
     result = []
-    phrase = filter_string(phrase)
-    if not phrase:
-        return string
-        
-    phrase_index = 0
-    
-    for char in string:
-        if char.isalpha():
-            p = phrase[phrase_index % len(phrase)]
-            result.append(encode_character(p, char))
-            phrase_index += 1
-        else:
-            result.append(char)
-            
+    klen = len(key)
+    for i, ch in enumerate(plain):
+        p = key[i % klen]
+        result.append(encode_character(p, ch))
     return ''.join(result)
+
 
 def vigenere_decode(string, phrase):
     """
-    pre: string is a string of characters and phrase is a pass phrase
-    post: function returns a single string that is decoded with
-        Vigenere algorithm
+    pre:  string is Vigenere cipher text, phrase is passphrase
+    post: returns the Vigenere-decoded lowercase string
     """
+    cipher = filter_string(string)
+    key = filter_string(phrase)
     result = []
-    phrase = filter_string(phrase)
-    if not phrase:
-        return string
-        
-    phrase_index = 0
-    
-    for char in string:
-        if char.isalpha():
-            p = phrase[phrase_index % len(phrase)]
-            result.append(decode_character(p, char))
-            phrase_index += 1
-        else:
-            result.append(char)
-            
+    klen = len(key)
+    for i, ch in enumerate(cipher):
+        p = key[i % klen]
+        result.append(decode_character(p, ch))
     return ''.join(result)
 
+
 def main():
-    """Main function that reads stdin and runs each cipher"""
-    # Rail fence encode
-    plain_text = input()
-    key = int(input())
-    encoded = rail_fence_encode(plain_text, key)
-    print(encoded)
-    
-    # Rail fence decode
-    encoded_text = input()
-    key = int(input())
-    decoded = rail_fence_decode(encoded_text, key)
-    print(decoded)
-    
+    # Rail-Fence encode
+    plain_rf = input().rstrip('\n')
+    key_rf = int(input().strip())
+    print(rail_fence_encode(plain_rf, key_rf))
+
+    # Rail-Fence decode
+    cipher_rf = input().rstrip('\n')
+    key_rf2 = int(input().strip())
+    print(rail_fence_decode(cipher_rf, key_rf2))
+
     # Vigenere encode
-    plain_text = input()
-    phrase = input()
-    encoded = vigenere_encode(plain_text, phrase)
-    print(encoded)
-    
+    plain_vg = input().rstrip('\n')
+    phrase_vg = input().rstrip('\n')
+    print(vigenere_encode(plain_vg, phrase_vg))
+
     # Vigenere decode
-    encoded_text = input()
-    phrase = input()
-    decoded = vigenere_decode(encoded_text, phrase)
-    print(decoded)
+    cipher_vg = input().rstrip('\n')
+    phrase_vg2 = input().rstrip('\n')
+    print(vigenere_decode(cipher_vg, phrase_vg2))
+
 
 if __name__ == "__main__":
     main()
