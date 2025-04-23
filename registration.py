@@ -16,27 +16,17 @@ UT EID 1: ppp625
 
 import sys
 
-
 class HeapError(Exception):
-    """
-    Custom exception class for heap errors.
-    """
-
+    """Custom exception class for heap errors."""
+    pass
 
 class BinaryHeap:
     """A modified binary heap implementation from the readings."""
 
     def __init__(self):
-        """
-        Initializes an empty binary heap.
-        """
         self.__heap = []
 
-
     def _perc_up(self, i):
-        """
-        Moves the element at index i up to its correct position in the heap.
-        """
         while (i - 1) // 2 >= 0:
             parent_idx = (i - 1) // 2
             if self.__heap[i] < self.__heap[parent_idx]:
@@ -46,18 +36,11 @@ class BinaryHeap:
                 )
             i = parent_idx
 
-
     def insert(self, item):
-        """
-        Inserts a new item into the heap and maintains the heap property.
-        """
         self.__heap.append(item)
         self._perc_up(len(self.__heap) - 1)
 
-
     def _perc_down(self, i):
-        """
-        Moves the element at index i down to its correct position in the heap."""
         while 2 * i + 1 < len(self.__heap):
             sm_child = self._get_min_child(i)
             if self.__heap[i] > self.__heap[sm_child]:
@@ -69,21 +52,14 @@ class BinaryHeap:
                 break
             i = sm_child
 
-
     def _get_min_child(self, i):
-        """
-        Returns the index of the smaller child of the node at index i.
-        """
         if 2 * i + 2 > len(self.__heap) - 1:
             return 2 * i + 1
         if self.__heap[2 * i + 1] < self.__heap[2 * i + 2]:
             return 2 * i + 1
         return 2 * i + 2
 
-
     def delete(self):
-        """
-        Removes and returns the smallest item from the heap."""
         if self.is_empty():
             raise HeapError("Heap is empty")
         self.__heap[0], self.__heap[-1] = self.__heap[-1], self.__heap[0]
@@ -91,486 +67,227 @@ class BinaryHeap:
         self._perc_down(0)
         return result
 
-
     def peek(self):
-        """
-        Returns the smallest item from the heap without removing it.
-        """
         if self.is_empty():
             raise IndexError("Heap is empty")
         return self.__heap[0]
 
-
     def is_empty(self):
-        """
-        Checks if the heap is empty."""
         return len(self.__heap) == 0
 
-
     def heapify(self, not_a_heap):
-        """
-        Converts a list into a heap in O(n) time."""
         self.__heap = not_a_heap[:]
         i = len(self.__heap) // 2 - 1
         while i >= 0:
             self._perc_down(i)
-            i = i - 1
-
+            i -= 1
 
 class Node:
-    """
-    Represents a node in a singly linked list.
-
-    Instance Variables:
-        data: The value or data stored in the node.
-        next: The reference to the next node in the linked list (None by default).
-    """
-
+    """Singly-linked list node."""
     def __init__(self, data, link=None):
-        """
-        Initializes a new node with the given data and a reference to the next node.
-
-        Args:
-            data: The data to store in the node.
-            link: Optional; the next node in the linked list (None by default).
-        """
         self.data = data
         self.next = link
 
-
     @property
     def next(self):
-        """
-        Getter method for the next attribute.
-        """
         return self.__next
-
 
     @next.setter
     def next(self, value):
-        """
-        Setter method for the next attribute.
-        """
         if value is None or isinstance(value, Node):
             self.__next = value
         else:
             raise ValueError("Next must be a Node instance or None.")
 
-
 class StackError(Exception):
-    """
-    Custom exception class for stack errors.
-    """
-
+    """Custom exception class for stack errors."""
+    pass
 
 class Stack:
-    """
-    A class that implements a stack using a singly linked list.
-
-    Instance Variables:
-        _top: The top node of the stack.
-        _size: The number of elements in the stack.
-    """
-
+    """Stack implemented via a singly linked list."""
     def __init__(self):
-        """
-        Initializes an empty stack with no elements.
-        """
         self._top = None
         self._size = 0
 
-
     def peek(self):
-        """
-        Returns the value at the top of the stack without removing it.
-
-        Raises:
-            StackError: If the stack is empty, raises "Peek from empty stack.".
-
-        Returns:
-            The data stored in the top node of the stack.
-        """
         if self.is_empty():
             raise StackError("Peek from empty stack.")
         return self._top.data
 
-
     def push(self, item):
-        """
-        Pushes a new item onto the top of the stack.
-
-        Args:
-            item: The data to push onto the stack.
-        """
         new_node = Node(item)
         new_node.next = self._top
         self._top = new_node
         self._size += 1
 
-
     def pop(self):
-        """
-        Removes and returns the item at the top of the stack.
-
-        Raises:
-            StackError: If the stack is empty, raises "Pop from empty stack.".
-
-        Returns:
-            The data from the top node of the stack.
-        """
         if self.is_empty():
             raise StackError("Pop from empty stack.")
-        removed_data = self._top.data
+        removed = self._top.data
         self._top = self._top.next
         self._size -= 1
-        return removed_data
-
+        return removed
 
     def is_empty(self):
-        """
-        Checks if the stack is empty.
-
-        Returns:
-            True if the stack is empty, False otherwise.
-        """
         return self._top is None
 
-
     def size(self):
-        """
-        Returns the number of items in the stack.
-
-        Returns:
-            The size of the stack as an integer.
-        """
         return self._size
 
-
 class Vertex:
-    """Vertex Class using properties and setters for better encapsulation."""
-
+    """Vertex for a directed graph, with visited flag and depth."""
     def __init__(self, label):
         self.__label = label
         self.visited = False
         self.depth = -1
 
-
     @property
     def visited(self):
-        """Property to get the visited status of the vertex."""
         return self.__visited
 
-
     @visited.setter
-    def visited(self, value):
-        """Setter to set the visited status of the vertex."""
-        if isinstance(value, bool):
-            self.__visited = value
+    def visited(self, val):
+        if isinstance(val, bool):
+            self.__visited = val
         else:
-            raise ValueError("Visited status must be a boolean value.")
-
+            raise ValueError("Visited must be a boolean")
 
     @property
     def depth(self):
-        """Property to get the depth of the vertex. This is the number of prereqs
-        that need to be completed before this course."""
         return self.__depth
 
-
     @depth.setter
-    def depth(self, value):
-        """Setter to set the visited status of the vertex."""
-        if isinstance(value, int):
-            self.__depth = value
+    def depth(self, val):
+        if isinstance(val, int):
+            self.__depth = val
         else:
-            raise ValueError("Depth must be a integer value.")
-
+            raise ValueError("Depth must be an integer")
 
     @property
     def label(self):
-        """Property to get the label of the vertex."""
         return self.__label
 
-
     def __str__(self):
-        """String representation of the vertex"""
         return str(self.__label)
 
-
 class Graph:
-    """A Class to present a Graph."""
-
+    """Directed graph using an adjacency matrix."""
     def __init__(self):
-        self.vertices = []  # a list of vertex objects
-        self.adjacency_matrix = []  # adjacency matrix of edges
-
+        self.vertices = []
+        self.adjacency_matrix = []
 
     def has_vertex(self, label):
-        """Check if a vertex is already in the graph"""
-        num_vertices = len(self.vertices)
-        for i in range(num_vertices):
-            if label == self.vertices[i].label:
-                return True
-        return False
+        return any(v.label == label for v in self.vertices)
 
-
-    def get_index(self, label):
-        """Given a label get the index of a vertex"""
-        num_vertices = len(self.vertices)
-        for i in range(num_vertices):
-            if label == self.vertices[i].label:
+    def get_index(self,	label):
+        for i, v in enumerate(self.vertices):
+            if v.label == label:
                 return i
         return -1
 
-
     def add_vertex(self, label):
-        """Add a Vertex with a given label to the graph"""
         if self.has_vertex(label):
             return
-
-        # add vertex to the list of vertices
         self.vertices.append(Vertex(label))
-
-        # add a new column in the adjacency matrix
-        num_vertices = len(self.vertices)
-        for i in range(num_vertices - 1):
-            self.adjacency_matrix[i].append(0)
-
-        # add a new row for the new vertex
-        new_row = []
-        for i in range(num_vertices):
-            new_row.append(0)
-        self.adjacency_matrix.append(new_row)
-
+        for row in self.adjacency_matrix:
+            row.append(0)
+        self.adjacency_matrix.append([0] * len(self.vertices))
 
     def add_edge(self, start, finish):
-        """Add unweighted directed edge to graph"""
         self.adjacency_matrix[start][finish] = 1
 
-
-    def get_adjacent_vertices(self, vertex_index):
-        """Return adjacent vertex indices to vertex_index"""
-        vertices = []
-        num_vertices = len(self.vertices)
-        for j in range(num_vertices):
-            if self.adjacency_matrix[vertex_index][j]:
-                vertices.append(j)
-        return vertices
-
-
-    def compute_depth(self):
-        """
-        Computes depth for each vertex in the graph.
-        Depth represents how many subsequent courses are blocked by this course 
-        in the longest prerequisite chain.
-        """
-        # Reset all vertices depths
-        for vertex in self.vertices:
-            vertex.depth = -1
-        
-        # Compute depth for each vertex
-        for i in range(len(self.vertices)):
-            if self.vertices[i].depth == -1:
-                self._compute_depth_helper(i)
-    
-    
-    def _compute_depth_helper(self, vertex_index):
-        """
-        Recursive helper function to compute depth for a vertex.
-        Returns the depth of the given vertex.
-        """
-        # If depth is already computed, return it
-        if self.vertices[vertex_index].depth != -1:
-            return self.vertices[vertex_index].depth
-        
-        # Get adjacent vertices (courses that this course is a prerequisite for)
-        adjacent_indices = self.get_adjacent_vertices(vertex_index)
-        
-        # If no outgoing edges (no courses depend on this), depth is 0
-        if not adjacent_indices:
-            self.vertices[vertex_index].depth = 0
-            return 0
-        
-        # Compute max depth among children and add 1
-        max_depth = 0
-        for adj_index in adjacent_indices:
-            adj_depth = self._compute_depth_helper(adj_index)
-            max_depth = max(max_depth, adj_depth)
-        
-        # Set depth to max_depth + 1
-        self.vertices[vertex_index].depth = max_depth + 1
-        return max_depth + 1
-
+    def get_adjacent_vertices(self, idx):
+        return [j for j, val in enumerate(self.adjacency_matrix[idx]) if val]
 
     def has_cycle(self):
-        """
-        Determine whether or not the graph has a cycle using depth-first search.
-        
-        post: returns True if there is a cycle and False otherwise.
-        """
-        # Reset all vertices to unvisited
-        for vertex in self.vertices:
-            vertex.visited = False
-            
-        # Track vertices in current DFS path
-        stack = Stack()
-        path = set()
-        
-        # Check for cycles starting from each unvisited vertex
-        for i in range(len(self.vertices)):
-            if not self.vertices[i].visited:
-                if self._dfs_cycle_helper(i, stack, path):
+        n = len(self.vertices)
+        status = [0] * n  # 0=unvisited,1=visiting,2=done
+
+        def dfs(u):
+            status[u] = 1
+            for v in self.get_adjacent_vertices(u):
+                if status[v] == 1:
                     return True
-                    
-        return False
-    
-    
-    def _dfs_cycle_helper(self, vertex_index, stack, path):
-        """
-        Helper function for cycle detection using DFS.
-        
-        vertex_index: The index of the current vertex being explored
-        stack: Stack to keep track of the DFS path
-        path: Set of vertex indices currently in the DFS path
-        
-        Returns True if a cycle is found, False otherwise
-        """
-        # Mark current vertex as visited
-        self.vertices[vertex_index].visited = True
-        stack.push(vertex_index)
-        path.add(vertex_index)
-        
-        # Visit all adjacent vertices
-        for adj_index in self.get_adjacent_vertices(vertex_index):
-            # If neighbor is in current path, we found a cycle
-            if adj_index in path:
-                return True
-            # If neighbor is unvisited and there's a cycle in its path
-            elif not self.vertices[adj_index].visited:
-                if self._dfs_cycle_helper(adj_index, stack, path):
+                if status[v] == 0 and dfs(v):
                     return True
-        
-        # Remove vertex from current path when backtracking
-        path.remove(vertex_index)
-        stack.pop()
+            status[u] = 2
+            return False
+
+        for i in range(n):
+            if status[i] == 0:
+                if dfs(i):
+                    return True
         return False
 
+    def compute_depth(self):
+        def dfs_depth(u):
+            if self.vertices[u].depth >= 0:
+                return self.vertices[u].depth
+            children = self.get_adjacent_vertices(u)
+            if not children:
+                self.vertices[u].depth = 0
+            else:
+                self.vertices[u].depth = 1 + max(dfs_depth(v) for v in children)
+            return self.vertices[u].depth
+
+        for i in range(len(self.vertices)):
+            if self.vertices[i].depth < 0:
+                dfs_depth(i)
 
     def get_registration_plan(self):
-        """
-        Return a valid ordering of courses to take for registration as a 2D
-        list of vertex labels, where each inner list will have a maximum of 4 vertices.
+        n = len(self.vertices)
+        indegree = [0] * n
+        for u in range(n):
+            for v in self.get_adjacent_vertices(u):
+                indegree[v] += 1
 
-        pre: a valid registration plan exists (no cycles).
-        post: returns a 2D list of strings, where each inner list represents a semester
-        """
-        courses = []
-        
-        # If the graph has a cycle, a valid registration plan doesn't exist
-        if self.has_cycle():
-            return courses
-            
-        # First, compute depth for prioritization
-        self.compute_depth()
-        
-        # Calculate in-degree (number of prerequisites) for each vertex
-        in_degree = [0] * len(self.vertices)
-        for i in range(len(self.vertices)):
-            for j in range(len(self.vertices)):
-                if self.adjacency_matrix[j][i] == 1:
-                    in_degree[i] += 1
-        
-        # Keep track of taken courses
-        taken = set()
-        
-        # Continue until all courses are taken
-        while len(taken) < len(self.vertices):
-            semester_courses = []
-            available_courses = []
-            
-            # Find all courses whose prerequisites are satisfied
-            for i in range(len(self.vertices)):
-                if i not in taken and in_degree[i] == 0:
-                    available_courses.append(i)
-            
-            # Sort available courses by depth (prioritize those with longest chains)
-            available_courses.sort(key=lambda i: self.vertices[i].depth, reverse=True)
-            
-            # Take up to 4 courses this semester
-            for _ in range(min(4, len(available_courses))):
-                if available_courses:
-                    course_index = available_courses.pop(0)
-                    semester_courses.append(self.vertices[course_index].label)
-                    taken.add(course_index)
-                    
-                    # Update in-degree for adjacent vertices
-                    for adj_index in self.get_adjacent_vertices(course_index):
-                        in_degree[adj_index] -= 1
-            
-            courses.append(semester_courses)
-        
-        return courses
+        available = [i for i in range(n) if indegree[i] == 0]
+        plan = []
+
+        while available:
+            # pick up to 4 by descending depth (ties preserve insertion order)
+            available.sort(key=lambda i: self.vertices[i].depth, reverse=True)
+            this_sem = available[:4]
+            plan.append([self.vertices[i].label for i in this_sem])
+            next_avail = available[4:]
+            for u in this_sem:
+                for v in self.get_adjacent_vertices(u):
+                    indegree[v] -= 1
+                    if indegree[v] == 0:
+                        next_avail.append(v)
+            available = next_avail
+
+        return plan
 
 
 def main():
-    """
-    The main function to retrieve a registration plan.
-    The output code has been written for you.
-    """
-    # Create a Graph object
     graph = Graph()
-    
-    # Check if filename is provided
-    if len(sys.argv) < 2:
-        print("Usage: python script.py <input_file>")
-        return
-        
-    filename = sys.argv[1]
-    
+    data = sys.stdin.read().split()
+    it = iter(data)
     try:
-        with open(filename, 'r') as file:
-            # Read the number of vertices
-            num_vertices = int(file.readline().strip())
-            
-            # Read the vertices and add them to the graph
-            for _ in range(num_vertices):
-                vertex_label = file.readline().strip()
-                graph.add_vertex(vertex_label)
-                
-            # Read the number of edges
-            num_edges = int(file.readline().strip())
-            
-            # Read the edges and insert them into the graph
-            for _ in range(num_edges):
-                edge_data = file.readline().strip().split()
-                if len(edge_data) == 2:
-                    from_label, to_label = edge_data
-                    from_index = graph.get_index(from_label)
-                    to_index = graph.get_index(to_label)
-                    if from_index != -1 and to_index != -1:
-                        graph.add_edge(from_index, to_index)
-    
-    except FileNotFoundError:
-        print(f"Error: File '{filename}' not found.")
+        n = int(next(it))
+    except StopIteration:
         return
-    except ValueError:
-        print("Error: Invalid file format.")
-        return
+    for _ in range(n):
+        graph.add_vertex(next(it))
+    m = int(next(it))
+    for _ in range(m):
+        u_label = next(it)
+        v_label = next(it)
+        u = graph.get_index(u_label)
+        v = graph.get_index(v_label)
+        graph.add_edge(u, v)
 
-    ####################################################################################
-    # DO NOT CHANGE ANYTHING BELOW THIS
     if graph.has_cycle():
         print("Registration plan invalid because a cycle was detected.")
     else:
         print("Valid registration plan detected.")
         graph.compute_depth()
-
-        courses = graph.get_registration_plan()
+        plan = graph.get_registration_plan()
         print()
         print("Registration plan: ")
-        for semester in courses:
-            print(semester)
-
+        for sem in plan:
+            print(sem)
 
 if __name__ == "__main__":
     main()
