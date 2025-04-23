@@ -43,8 +43,7 @@ def print_block(color):
     """Print a block in the specified color."""
     print(colored(BLOCK_CHAR, color) * 2, end="")
 
-
-# -----------------------PRINTING LOGIC, DON'T WORRY ABOUT THIS PART----------------------------
+# ----------------------------------------------------------------------------------------------
 
 
 class Node:
@@ -57,13 +56,6 @@ class Node:
     """
 
     def __init__(self, data, next=None):
-        """
-        Initializes a new node with the given data and a reference to the next node.
-
-        Args:
-            data: The data to store in the node.
-            next: Optional; the next node in the linked list (None by default).
-        """
         self.data = data
         self.next = next
 
@@ -75,78 +67,35 @@ class StackError(Exception):
 class Stack:
     """
     A class that implements a stack using a singly linked list.
-    
-    Instance Variables:
-        _top: The top node of the stack.
-        _size: The number of elements in the stack.
     """
-    
+
     def __init__(self):
-        """
-        Initializes an empty stack with no elements.
-        """
         self._top = None
         self._size = 0
 
     def peek(self):
-        """
-        Returns the value at the top of the stack without removing it.
-        
-        Raises:
-            StackError: If the stack is empty, raises "Peek from empty stack.".
-        
-        Returns:
-            The data stored in the top node of the stack.
-        """
         if self.is_empty():
             raise StackError("Peek from empty stack.")
         return self._top.data
 
     def push(self, item):
-        """
-        Pushes a new item onto the top of the stack.
-        
-        Args:
-            item: The data to push onto the stack.
-        """
         new_node = Node(item)
         new_node.next = self._top
         self._top = new_node
         self._size += 1
 
     def pop(self):
-        """
-        Removes and returns the item at the top of the stack.
-        
-        Raises:
-            StackError: If the stack is empty, raises "Pop from empty stack.".
-        
-        Returns:
-            The data from the top node of the stack.
-        """
         if self.is_empty():
             raise StackError("Pop from empty stack.")
-        removed_data = self._top.data
+        data = self._top.data
         self._top = self._top.next
         self._size -= 1
-        return removed_data
+        return data
 
     def is_empty(self):
-        """
-        Checks if the stack is empty.
-        
-        Returns:
-            True if the stack is empty, False otherwise.
-        """
         return self._top is None
 
     def size(self):
-        """
-        Returns the number of items in the stack.
-        
-        Returns:
-            The size of the stack as an integer.
-        """
         return self._size
 
 
@@ -157,42 +106,19 @@ class QueueError(Exception):
 class Queue:
     """
     A class that implements a queue using a singly linked list with a tail.
-
-    Instance Variables:
-        _front: The beginning node of the queue.
-        _rear: The end node of the queue.
-        _size: The number of elements in the queue.
     """
 
     def __init__(self):
-        """
-        Initializes an empty queue with no elements.
-        """
         self._front = None
         self._rear = None
         self._size = 0
 
     def peek(self):
-        """
-        Returns the value at the front of the queue without removing it.
-
-        Raises:
-            QueueError: If the queue is empty, raises "Peek from empty queue.".
-
-        Returns:
-            The data stored in the front node of the queue.
-        """
         if self.is_empty():
             raise QueueError("Peek from empty queue.")
         return self._front.data
 
     def enqueue(self, item):
-        """
-        Enqueues a new item at the end of the queue.
-
-        Args:
-            item: The data to put at the end of queue.
-        """
         new_node = Node(item)
         if self.is_empty():
             self._front = new_node
@@ -202,40 +128,19 @@ class Queue:
         self._size += 1
 
     def dequeue(self):
-        """
-        Removes and returns the item at the front of the queue.
-
-        Raises:
-            QueueError: If the queue is empty, raises "Dequeue from empty queue.".
-
-        Returns:
-            The data from the front node of the queue.
-        """
         if self.is_empty():
             raise QueueError("Dequeue from empty queue.")
-        front_data = self._front.data
+        data = self._front.data
         self._front = self._front.next
-        if self._front is None:  # If queue becomes empty
+        if self._front is None:
             self._rear = None
         self._size -= 1
-        return front_data
+        return data
 
     def is_empty(self):
-        """
-        Checks if the queue is empty.
-
-        Returns:
-            True if the queue is empty, False otherwise.
-        """
         return self._size == 0
 
     def size(self):
-        """
-        Returns the number of items in the queue.
-
-        Returns:
-            The size of the queue as an integer.
-        """
         return self._size
 
 
@@ -244,248 +149,155 @@ class ColoredVertex:
 
     def __init__(self, index, x, y, color):
         self.index = index
-        self.color = color
-        self.prev_color = color
         self.x = x
         self.y = y
+        self.color = color
+        self.prev_color = color
         self.edges = []
         self.visited = False
 
     def add_edge(self, vertex_index):
-        """Add an edge to another vertex."""
+        """Add an edge to another vertex index."""
         self.edges.append(vertex_index)
 
-    def visit_and_set_color(self, color):
-        """Set the color of the vertex and mark it visited."""
+    def visit_and_set_color(self, new_color):
+        """Mark this vertex visited and update its color."""
         self.visited = True
         self.prev_color = self.color
-        self.color = color
-        print("Visited vertex " + str(self.index))
+        self.color = new_color
+        print(f"Visited vertex {self.index}")
 
     def __str__(self):
-        return f"index: {self.index}, color: {self.color}, x: {self.x}, y: {self.y}"
+        return f"index: {self.index}, color: {self.color}, x: {self.x}, y: {self.y}"  
 
 
 class ImageGraph:
-    """Class for the graph."""
+    """Class for the graph representing the image."""
 
     def __init__(self, image_size):
-        self.vertices = []
         self.image_size = image_size
+        self.vertices = []
 
     def print_image(self):
-        """Print the image formed by the vertices."""
-        img = [
-            ["black" for _ in range(self.image_size)] for _ in range(self.image_size)
-        ]
-
-        # Fill img array
-        for vertex in self.vertices:
-            img[vertex.y][vertex.x] = vertex.color
-
-        for line in img:
-            for pixel in line:
+        """Print the current state of the image grid."""
+        img = [["black"] * self.image_size for _ in range(self.image_size)]
+        for v in self.vertices:
+            img[v.y][v.x] = v.color
+        for row in img:
+            for pixel in row:
                 print_block(pixel)
             print()
-        # Print new line/reset color
         print(RESET_CHAR)
 
     def reset_visited(self):
-        """Reset the visited flag for all vertices."""
-        for vertex in self.vertices:
-            vertex.visited = False
+        """Reset the visited flag on all vertices."""
+        for v in self.vertices:
+            v.visited = False
 
-    # Create the adjacency matrix.
-    # Return the matrix at the end
-    # TODO: Modify this method. You may delete this comment when you are done.
     def create_adjacency_matrix(self):
         """
         Creates and returns the adjacency matrix for the graph.
-
-        post: return a 2D list of integers representing the adjacency matrix.
         """
         n = len(self.vertices)
-        matrix = [[0 for _ in range(n)] for _ in range(n)]
-        for vertex in self.vertices:
-            for neighbor_index in vertex.edges:
-                matrix[vertex.index][neighbor_index] = 1
+        matrix = [[0] * n for _ in range(n)]
+        for v in self.vertices:
+            for nei in v.edges:
+                matrix[v.index][nei] = 1
         return matrix
 
-    # TODO: Modify this method. You may delete this comment when you are done.
-    def bfs(self, start_index, color):
+    def bfs(self, start_index, new_color):
         """
-        You must implement this algorithm using a Queue.
-
-        Performs a Breadth-First Search (DFS) starting from a given vertex, changing
-        all vertices that are adjacent and share the same color as the starting
-        vertex's color to the given color. Think of how an image bucket fill will
-        only change all same colored pixels that are in contact with each other.
-
-        Do not remove the first 2 statements we provide.
-        you may choose to call print_images in this method debugging yourself
-
-
-        This method assumes that the pre conditions have been handled before
-        calling this method.
-
-        pre: start_index is a valid integer representing the index of the starting
-             vertex in the vertices instance variable.
-             color: The color to change vertices to during the DFS traversal
-
-        post: every vertex that matches the start index's color will be recolored
-              to the given color
+        Bucket-fill via breadth-first search using a Queue.
         """
-
         self.reset_visited()
+        original_color = self.vertices[start_index].color
         print("Starting BFS; initial state:")
         self.print_image()
 
-        start_vertex = self.vertices[start_index]
-        target_color = start_vertex.color
         q = Queue()
-        q.enqueue(start_vertex)
-
+        q.enqueue(start_index)
         while not q.is_empty():
-            current = q.dequeue()
-            if not current.visited and current.color == target_color:
-                current.visit_and_set_color(color)
-                for neighbor_index in current.edges:
-                    q.enqueue(self.vertices[neighbor_index])
+            idx = q.dequeue()
+            v = self.vertices[idx]
+            if not v.visited and v.color == original_color:
+                v.visit_and_set_color(new_color)
+                self.print_image()
+                for nei in v.edges:
+                    w = self.vertices[nei]
+                    if not w.visited and w.color == original_color:
+                        q.enqueue(nei)
 
-        print("BFS completed; final state:")
-        self.print_image()
-
-
-    # TODO: Modify this method. You may delete this comment when you are done.
-    def dfs(self, start_index, color):
+    def dfs(self, start_index, new_color):
         """
-        You must implement this algorithm using a Stack WITHOUT using recursion.
-
-        Performs a Depth-First Search (DFS) starting from a given vertex, changing
-        all vertices that are adjacent and share the same color as the starting
-        vertex's color to the given color. Think of how an image bucket fill will
-        only change all same colored pixels that are in contact with each other.
-
-        Do not remove the first 2 statements we provide.
-        you may choose to call print_images in this func method debugging yourself
-
-
-        This method assumes that the pre conditions have been handled before
-        calling this method.
-
-        pre: start_index is a valid integer representing the index of the starting
-             vertex in the vertices instance variable.
-             color: The color to change vertices to during the DFS traversal
-
-        post: every vertex that matches the start index's color will be recolored
-              to the given color
+        Bucket-fill via depth-first search using a Stack.
         """
-
         self.reset_visited()
+        original_color = self.vertices[start_index].color
         print("Starting DFS; initial state:")
         self.print_image()
 
-        start_vertex = self.vertices[start_index]
-        target_color = start_vertex.color
-        s = Stack()
-        s.push(start_vertex)
+        st = Stack()
+        st.push(start_index)
+        while not st.is_empty():
+            idx = st.pop()
+            v = self.vertices[idx]
+            if not v.visited and v.color == original_color:
+                v.visit_and_set_color(new_color)
+                self.print_image()
+                # Push neighbors in reverse so smallest index is processed first
+                for nei in reversed(v.edges):
+                    w = self.vertices[nei]
+                    if not w.visited and w.color == original_color:
+                        st.push(nei)
 
-        while not s.is_empty():
-            current = s.pop()
-            if not current.visited and current.color == target_color:
-                current.visit_and_set_color(color)
-                for neighbor_index in current.edges:
-                    s.push(self.vertices[neighbor_index])
 
-        print("DFS completed; final state:")
-        self.print_image()
-
-# TODO: Modify this function. You may delete this comment when you are done.
 def create_graph(data):
     """
-    Creates a Graph object from the given input data and parses the starting
-    position and search color.
-
-    pre: data is the entire inputted data as a single string.
-
-    post: a tuple containing the ImageGraph instance, the starting position,
-          and the search color.
+    Parse the input data (string) and build the ImageGraph,
+    then return (graph, start_index, fill_color).
     """
-
-    # split the data by new line
-
-    # get size of image and number of vertices
-
-    # create the ImageGraph
-
-    # create vertices - vertex info has the format "x,y,color"
-
-    # create edges between vertices - edge info has the format "from_index,to_index"
-    # connect vertex A to vertex B and the other way around
-
-    # read search starting position and color
-
-    # return the ImageGraph, starting position, and color as a tuple in this order.
-    lines = data.strip().splitlines()
-    size = int(lines[0])
-    num_vertices = int(lines[1])
-
+    lines = [line.strip() for line in data.splitlines() if line.strip()]
+    idx = 0
+    size = int(lines[idx]); idx += 1
     graph = ImageGraph(size)
 
-    for i in range(2, 2 + num_vertices):
-        x, y, color = lines[i].split(",")
-        graph.vertices.append(ColoredVertex(i - 2, int(x), int(y), color.strip()))
+    # Read vertices
+    num_vertices = int(lines[idx]); idx += 1
+    for i in range(num_vertices):
+        parts = [p.strip() for p in lines[idx].split(',')]
+        x, y = int(parts[0]), int(parts[1])
+        col = parts[2]
+        graph.vertices.append(ColoredVertex(i, x, y, col))
+        idx += 1
 
-    edge_start = 2 + num_vertices
-    while edge_start < len(lines) and "," in lines[edge_start]:
-        from_index, to_index = map(int, lines[edge_start].split(","))
-        graph.vertices[from_index].add_edge(to_index)
-        graph.vertices[to_index].add_edge(from_index)
-        edge_start += 1
+    # Read edges
+    num_edges = int(lines[idx]); idx += 1
+    for _ in range(num_edges):
+        parts = [p.strip() for p in lines[idx].split(',')]
+        a, b = int(parts[0]), int(parts[1])
+        graph.vertices[a].add_edge(b)
+        graph.vertices[b].add_edge(a)
+        idx += 1
 
-    start_index = int(lines[edge_start])
-    fill_color = lines[edge_start + 1].strip()
-
-    if start_index >= len(graph.vertices):
-        start_index = len(graph.vertices) - 1
-
+    # Read bucket-fill spec
+    parts = [p.strip() for p in lines[idx].split(',')]
+    start_index, fill_color = int(parts[0]), parts[1]
     return graph, start_index, fill_color
 
-# TODO: Modify this function. You may delete this comment when you are done.
+
 def main():
-    """
-    The main function that drives the program execution.
-
-    This function will not be tested, but you should
-    implement it to test your code visually.
-    """
-
-    # read all input as a single string.
+    # For manual testing; not used by the unit tests
     data = sys.stdin.read()
+    graph, start, color = create_graph(data)
+    mat = graph.create_adjacency_matrix()
+    print("[")
+    for row in mat:
+        print(" " + str(row))
+    print("]")
+    graph.bfs(start, color)
+    graph, start, color = create_graph(data)
+    graph.dfs(start, color)
 
-    # create graph, passing in data
-
-    # print adjacency matrix in a readable format (maybe row by row)
-
-    # run bfs
-
-    # reset by creating graph again
-
-    # run dfs
-    graph, start_index, fill_color = create_graph(data)
-
-    print("\nAdjacency Matrix:")
-    matrix = graph.create_adjacency_matrix()
-    for row in matrix:
-        print(row)
-
-    print("\n=== BFS FILL ===")
-    graph.bfs(start_index, fill_color)
-
-    # Re-create the graph for a clean DFS run
-    graph, start_index, fill_color = create_graph(data)
-    print("\n=== DFS FILL ===")
-    graph.dfs(start_index, fill_color)
 
 if __name__ == "__main__":
     main()
