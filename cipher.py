@@ -15,22 +15,18 @@ UT EID 1: ppp625
 """
 
 
-#!/usr/bin/env python3
-
 def rail_fence_encode(string, key):
     """
-    pre: string is a string of characters and key is an integer 2 <= key
-         and key <= len(string)
-    post: returns a single string encoded with the rail-fence algorithm
+    pre:  string is a string of characters and key is an integer 2 <= key < len(string)
+    post: returns a single string encoded with the rail‐fence algorithm
     """
-    # create rows
     rails = [''] * key
     row = 0
     direction = 1  # 1 = down, -1 = up
 
     for ch in string:
         rails[row] += ch
-        # if we hit top or bottom, flip direction
+        # reverse direction if we hit the top or bottom rail
         if row + direction == key or row + direction < 0:
             direction *= -1
         row += direction
@@ -40,15 +36,14 @@ def rail_fence_encode(string, key):
 
 def rail_fence_decode(string, key):
     """
-    pre: string is a string of characters and key is an integer 2 <= key
-         and key <= len(string)
-    post: returns the decoded plain text
+    pre:  string is a string of characters and key is an integer 2 <= key < len(string)
+    post: returns the decoded plain‐text
     """
     n = len(string)
-    # empty grid
+    # create empty grid
     grid = [[''] * n for _ in range(key)]
 
-    # mark the zig-zag path
+    # mark the zig‐zag pattern with placeholders
     row = 0
     direction = 1
     for col in range(n):
@@ -57,7 +52,7 @@ def rail_fence_decode(string, key):
             direction *= -1
         row += direction
 
-    # fill in letters row by row
+    # fill letters into the marked spots, row by row
     idx = 0
     for r in range(key):
         for c in range(n):
@@ -65,7 +60,7 @@ def rail_fence_decode(string, key):
                 grid[r][c] = string[idx]
                 idx += 1
 
-    # read off in zig-zag order
+    # read off the letters in zig‐zag order
     result = []
     row = 0
     direction = 1
@@ -89,8 +84,8 @@ def filter_string(string):
 
 def encode_character(p, s):
     """
-    pre:  p is a lowercase letter, s is a lowercase letter
-    post: returns the Vigenere-encoded character
+    pre:  p and s are lowercase letters ('a'..'z')
+    post: returns the single character resulting from Vigenère encoding
     """
     shift = (ord(s) - 97 + (ord(p) - 97)) % 26
     return chr(shift + 97)
@@ -98,8 +93,8 @@ def encode_character(p, s):
 
 def decode_character(p, s):
     """
-    pre:  p is a lowercase letter, s is a lowercase letter
-    post: returns the Vigenere-decoded character
+    pre:  p and s are lowercase letters ('a'..'z')
+    post: returns the single character resulting from Vigenère decoding
     """
     shift = (ord(s) - 97 - (ord(p) - 97) + 26) % 26
     return chr(shift + 97)
@@ -108,53 +103,74 @@ def decode_character(p, s):
 def vigenere_encode(string, phrase):
     """
     pre:  string is raw text, phrase is passphrase
-    post: returns the Vigenere-encoded lowercase string
+    post: returns the Vigenère‐encoded lowercase string
     """
     plain = filter_string(string)
     key = filter_string(phrase)
     result = []
     klen = len(key)
+
     for i, ch in enumerate(plain):
         p = key[i % klen]
         result.append(encode_character(p, ch))
+
     return ''.join(result)
 
 
 def vigenere_decode(string, phrase):
     """
-    pre:  string is Vigenere cipher text, phrase is passphrase
-    post: returns the Vigenere-decoded lowercase string
+    pre:  string is Vigenère cipher text, phrase is passphrase
+    post: returns the Vigenère‐decoded lowercase string
     """
     cipher = filter_string(string)
     key = filter_string(phrase)
     result = []
     klen = len(key)
+
     for i, ch in enumerate(cipher):
         p = key[i % klen]
         result.append(decode_character(p, ch))
+
     return ''.join(result)
 
 
 def main():
-    # Rail-Fence encode
-    plain_rf = input().rstrip('\n')
-    key_rf = int(input().strip())
-    print(rail_fence_encode(plain_rf, key_rf))
+    # Read inputs in the specified order:
+    # 1) plain text for rail‐fence
+    # 2) key for rail‐fence encode
+    # 3) cipher text for rail‐fence decode
+    # 4) key for rail‐fence decode
+    # 5) plain text for Vigenère
+    # 6) pass phrase for Vigenère encode
+    # 7) cipher text for Vigenère decode
+    # 8) pass phrase for Vigenère decode
 
-    # Rail-Fence decode
+    plain_rf  = input().rstrip('\n')
+    key_rf    = int(input().strip())
     cipher_rf = input().rstrip('\n')
-    key_rf2 = int(input().strip())
-    print(rail_fence_decode(cipher_rf, key_rf2))
-
-    # Vigenere encode
-    plain_vg = input().rstrip('\n')
+    key_rf2   = int(input().strip())
+    plain_vg  = input().rstrip('\n')
     phrase_vg = input().rstrip('\n')
-    print(vigenere_encode(plain_vg, phrase_vg))
-
-    # Vigenere decode
     cipher_vg = input().rstrip('\n')
-    phrase_vg2 = input().rstrip('\n')
-    print(vigenere_decode(cipher_vg, phrase_vg2))
+    phrase_vg2= input().rstrip('\n')
+
+    # Rail‐Fence section
+    print("Rail Fence Cipher\n")
+    print(f"Plain Text: {plain_rf}")
+    print(f"Key: {key_rf}")
+    print(f"Encoded Text: {rail_fence_encode(plain_rf, key_rf)}\n")
+    print(f"Encoded Text: {cipher_rf}")
+    print(f"Enter Key: {key_rf2}")
+    print(f"Decoded Text: {rail_fence_decode(cipher_rf, key_rf2)}\n")
+
+    # Vigenère section
+    print("Vigenere Cipher\n")
+    print(f"Plain Text: {plain_vg}")
+    print(f"Pass Phrase: {phrase_vg}")
+    print(f"Encoded Text: {vigenere_encode(plain_vg, phrase_vg)}\n")
+    print(f"Encoded Text: {cipher_vg}")
+    print(f"Pass Phrase: {phrase_vg2}")
+    print(f"Decoded Text: {vigenere_decode(cipher_vg, phrase_vg2)}")
 
 
 if __name__ == "__main__":
